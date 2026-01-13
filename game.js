@@ -242,6 +242,17 @@ function updateDisplay() {
     document.getElementById('matches').textContent = matchedPairs;
 }
 
+// Start game sound immediately when page loads
+window.addEventListener('DOMContentLoaded', () => {
+    gameSound.play().catch(e => {
+        console.log('Sound konnte nicht automatisch abgespielt werden:', e);
+        // Try again after user interaction
+        document.addEventListener('click', () => {
+            gameSound.play().catch(err => console.log('Sound Fehler:', err));
+        }, { once: true });
+    });
+});
+
 // Restart button
 document.getElementById('restartBtn').addEventListener('click', () => {
     initGame();
