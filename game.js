@@ -80,7 +80,7 @@ function initGame() {
         
         const cardBack = document.createElement('div');
         cardBack.className = 'card-back';
-        cardBack.textContent = '🐾';
+        //cardBack.textContent = '🐾';
         
         card.appendChild(cardFront);
         card.appendChild(cardBack);
