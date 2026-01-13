@@ -17,16 +17,27 @@ matchSound.volume = 0.6;
 failSound.volume = 0.5;
 winSound.volume = 0.6;
 
-// Card images (using bild1.png to bild4.png, each appears twice)
+// Set game sound to loop
+gameSound.loop = true;
+
+// Card images (using all 8 images, each appears twice for 16 cards total)
 const cardImages = [
     'assets/images/bild1.png',
     'assets/images/bild2.png',
     'assets/images/bild3.png',
     'assets/images/bild4.png',
+    'assets/images/bild5.png',
+    'assets/images/bild6.png',
+    'assets/images/bild7.png',
+    'assets/images/bild8.png',
     'assets/images/bild1.png',
     'assets/images/bild2.png',
     'assets/images/bild3.png',
-    'assets/images/bild4.png'
+    'assets/images/bild4.png',
+    'assets/images/bild5.png',
+    'assets/images/bild6.png',
+    'assets/images/bild7.png',
+    'assets/images/bild8.png'
 ];
 
 // Initialize game
@@ -38,6 +49,14 @@ function initGame() {
     isFlipping = false;
     
     updateDisplay();
+    
+    // Stop and reset game sound
+    gameSound.pause();
+    gameSound.currentTime = 0;
+    
+    // Clear matched stack
+    const matchedStack = document.getElementById('matchedStack');
+    matchedStack.innerHTML = '<h3>Gefundene Pärchen</h3>';
     
     // Shuffle cards
     const shuffledImages = [...cardImages].sort(() => Math.random() - 0.5);
@@ -72,7 +91,7 @@ function initGame() {
         cards.push(card);
     });
     
-    // Play game sound
+    // Play game sound in loop
     gameSound.play().catch(e => console.log('Sound konnte nicht abgespielt werden:', e));
 }
 
@@ -117,11 +136,16 @@ function checkMatch() {
         // Play match sound
         matchSound.play().catch(e => console.log('Sound konnte nicht abgespielt werden:', e));
         
+        // Move matched pair to stack
+        setTimeout(() => {
+            moveToStack(card1, card2, image1);
+        }, 500);
+        
         // Check if game is won
         if (matchedPairs === 8) {
             setTimeout(() => {
                 winGame();
-            }, 500);
+            }, 1000);
         }
         
         flippedCards = [];
@@ -174,6 +198,42 @@ function winGame() {
     setTimeout(() => {
         alert(`🎉 Glückwunsch! Du hast alle Pärchen gefunden! 🎉\n\nZüge: ${moves}`);
     }, 500);
+}
+
+// Move matched pair to stack
+function moveToStack(card1, card2, image) {
+    const matchedStack = document.getElementById('matchedStack');
+    
+    // Create stack item
+    const stackItem = document.createElement('div');
+    stackItem.className = 'stack-item';
+    stackItem.style.zIndex = matchedPairs;
+    
+    // Calculate position based on number of pairs found
+    const topOffset = 50 + (matchedPairs - 1) * 10;
+    const rotation = (matchedPairs - 1) % 2 === 0 ? 
+        (matchedPairs - 1) * 2 : 
+        -(matchedPairs - 1) * 2;
+    
+    stackItem.style.top = `${topOffset}px`;
+    stackItem.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+    
+    const stackImg = document.createElement('img');
+    stackImg.src = image;
+    stackImg.alt = 'Gefundenes Paar';
+    stackItem.appendChild(stackImg);
+    
+    matchedStack.appendChild(stackItem);
+    
+    // Remove cards from board with animation
+    setTimeout(() => {
+        card1.style.opacity = '0';
+        card2.style.opacity = '0';
+        setTimeout(() => {
+            card1.style.display = 'none';
+            card2.style.display = 'none';
+        }, 300);
+    }, 200);
 }
 
 // Update display
