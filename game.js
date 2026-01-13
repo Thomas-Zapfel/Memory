@@ -6,7 +6,7 @@ let moves = 0;
 let isFlipping = false;
 
 // Audio elements
-const gameSound = new Audio('assets/sounds/game sound.mp3');
+const gameSound = new Audio('assets/sounds/game sound 2.mp3');
 const matchSound = new Audio('assets/sounds/match.mp3');
 const failSound = new Audio('assets/sounds/fail.mp3');
 const winSound = new Audio('assets/sounds/win.mp3');
@@ -225,13 +225,15 @@ function moveToStack(card1, card2, image) {
     
     matchedStack.appendChild(stackItem);
     
-    // Remove cards from board with animation
+    // Hide cards but keep their space in the grid
     setTimeout(() => {
         card1.style.opacity = '0';
         card2.style.opacity = '0';
         setTimeout(() => {
-            card1.style.display = 'none';
-            card2.style.display = 'none';
+            card1.style.visibility = 'hidden';
+            card2.style.visibility = 'hidden';
+            card1.style.pointerEvents = 'none';
+            card2.style.pointerEvents = 'none';
         }, 300);
     }, 200);
 }
