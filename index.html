@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paw Patrol Memory</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐾 Paw Patrol Memory 🐾</h1>
+            <div class="game-info">
+                <div class="moves">Züge: <span id="moves">0</span></div>
+                <div class="matches">Gefunden: <span id="matches">0</span> / 8</div>
+            </div>
+        </header>
+        
+        <div class="game-board" id="gameBoard"></div>
+        
+        <div class="controls">
+            <button id="restartBtn" class="restart-btn">🔄 Nochmal spielen</button>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
