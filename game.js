@@ -5,6 +5,7 @@ let matchedPairs = 0;
 let moves = 0;
 let isFlipping = false;
 let isMuted = false;
+let isFullscreen = false;
 
 // Audio elements
 const gameSound = new Audio('assets/sounds/game sound 2.mp3');
@@ -30,6 +31,30 @@ function applyMuteState() {
         btn.classList.toggle('muted', isMuted);
         btn.textContent = isMuted ? '🔇' : '🔊';
         btn.setAttribute('aria-label', isMuted ? 'Ton einschalten' : 'Ton stummschalten');
+    }
+}
+
+function toggleFullscreen() {
+    const doc = document;
+    const docEl = document.documentElement;
+
+    if (!doc.fullscreenElement) {
+        if (docEl.requestFullscreen) {
+            docEl.requestFullscreen();
+        }
+        isFullscreen = true;
+    } else {
+        if (doc.exitFullscreen) {
+            doc.exitFullscreen();
+        }
+        isFullscreen = false;
+    }
+
+    const btn = document.getElementById('fullscreenToggle');
+    if (btn) {
+        const active = !!doc.fullscreenElement;
+        btn.textContent = active ? '🡼' : '⛶';
+        btn.setAttribute('aria-label', active ? 'Vollbild verlassen' : 'Vollbild aktivieren');
     }
 }
 
@@ -272,12 +297,19 @@ function updateDisplay() {
 window.addEventListener('DOMContentLoaded', () => {
     // Sound-Button initialisieren
     const soundBtn = document.getElementById('soundToggle');
+    const fullscreenBtn = document.getElementById('fullscreenToggle');
     if (soundBtn) {
         soundBtn.addEventListener('click', () => {
             isMuted = !isMuted;
             applyMuteState();
         });
         applyMuteState();
+    }
+
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', () => {
+            toggleFullscreen();
+        });
     }
 
     gameSound.play().catch(e => {
