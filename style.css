@@ -21,7 +21,8 @@ body {
 .container {
     width: 100%;
     max-width: 1200px;
-    height: 100vh;
+    /* 100vh ist auf Mobile/Tablet oft unzuverlässig (Browser-Leisten). Wir nutzen --vh aus JS. */
+    height: calc(var(--vh, 1vh) * 100);
     background: rgba(255, 255, 255, 0.9);
     border-radius: 20px;
     padding: 12px 18px 14px;
@@ -134,10 +135,14 @@ h1 {
 
 .game-board {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(4, var(--card-size, 1fr));
+    grid-auto-rows: var(--card-size, auto);
+    justify-content: center;
+    align-content: start;
+    gap: var(--card-gap, 12px);
     flex: 1;
     perspective: 1000px;
+    min-height: 0;
 }
 
 .matched-stack {
@@ -176,7 +181,8 @@ h1 {
 }
 
 .card {
-    aspect-ratio: 1;
+    width: 100%;
+    height: 100%;
     position: relative;
     cursor: pointer;
     transform-style: preserve-3d;
@@ -533,9 +539,7 @@ h1 {
         height: 64px;
     }
 
-    .card {
-        aspect-ratio: 0.75; /* etwas flacher, damit alles auf die Höhe passt */
-    }
+    /* Kartenhöhe kommt jetzt dynamisch aus JS über --card-size */
 
     .restart-btn {
         padding: 10px 26px;

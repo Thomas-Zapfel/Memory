@@ -7,6 +7,37 @@ let isFlipping = false;
 let isMuted = false;
 let isFullscreen = false;
 
+function setViewportHeightVar() {
+    // iOS/iPadOS/Android: innerHeight berücksichtigt Browserleisten zuverlässiger als 100vh
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+function layoutToFit() {
+    setViewportHeightVar();
+
+    const board = document.getElementById('gameBoard');
+    const layout = document.querySelector('.game-layout');
+    if (!board || !layout) return;
+
+    // Gap aus CSS lesen (Fallback)
+    const computed = window.getComputedStyle(board);
+    const gap = parseFloat(computed.gap) || 12;
+
+    const widthAvailable = board.clientWidth;
+    const heightAvailable = layout.clientHeight;
+
+    if (widthAvailable <= 0 || heightAvailable <= 0) return;
+
+    // 4 Spalten / 4 Reihen => Karten-Größe so wählen, dass beides passt
+    const sizeByWidth = Math.floor((widthAvailable - gap * 3) / 4);
+    const sizeByHeight = Math.floor((heightAvailable - gap * 3) / 4);
+    const cardSize = Math.max(48, Math.min(sizeByWidth, sizeByHeight));
+
+    document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
+    document.documentElement.style.setProperty('--card-gap', `${Math.min(gap, 12)}px`);
+}
+
 // Audio elements
 const gameSound = new Audio('assets/sounds/game sound 2.mp3');
 const matchSound = new Audio('assets/sounds/match.mp3');
@@ -39,8 +70,15 @@ function toggleFullscreen() {
     const docEl = document.documentElement;
 
     if (!doc.fullscreenElement) {
-        if (docEl.requestFullscreen) {
-            docEl.requestFullscreen();
+        try {
+            if (docEl.requestFullscreen) {
+                docEl.requestFullscreen();
+            } else {
+                alert('Vollbild wird von diesem Browser/Tablet leider nicht unterstützt. Tipp: Auf iPad/Safari funktioniert echtes Vollbild oft nur als App über "Zum Home-Bildschirm".');
+            }
+        } catch (e) {
+            console.log('Fullscreen Fehler:', e);
+            alert('Vollbild konnte nicht aktiviert werden. Tipp: Auf iPad/Safari funktioniert echtes Vollbild oft nur als App über "Zum Home-Bildschirm".');
         }
         isFullscreen = true;
     } else {
@@ -130,6 +168,11 @@ function initGame() {
         
         gameBoard.appendChild(card);
         cards.push(card);
+    });
+
+    // Nach DOM-Aufbau Karten-Größe an Viewport anpassen
+    requestAnimationFrame(() => {
+        layoutToFit();
     });
     
     // Play game sound in loop
@@ -295,6 +338,11 @@ function updateDisplay() {
 
 // Start game sound immediately when page loads
 window.addEventListener('DOMContentLoaded', () => {
+    // Viewport-Höhe und Layout initial setzen
+    layoutToFit();
+    window.addEventListener('resize', layoutToFit);
+    window.addEventListener('orientationchange', () => setTimeout(layoutToFit, 150));
+
     // Sound-Button initialisieren
     const soundBtn = document.getElementById('soundToggle');
     const fullscreenBtn = document.getElementById('fullscreenToggle');
@@ -311,6 +359,17 @@ window.addEventListener('DOMContentLoaded', () => {
             toggleFullscreen();
         });
     }
+
+    // Button-Status bei externen Fullscreen-Änderungen (z.B. ESC)
+    document.addEventListener('fullscreenchange', () => {
+        const btn = document.getElementById('fullscreenToggle');
+        if (btn) {
+            const active = !!document.fullscreenElement;
+            btn.textContent = active ? '🡼' : '⛶';
+            btn.setAttribute('aria-label', active ? 'Vollbild verlassen' : 'Vollbild aktivieren');
+        }
+        layoutToFit();
+    });
 
     gameSound.play().catch(e => {
         console.log('Sound konnte nicht automatisch abgespielt werden:', e);
