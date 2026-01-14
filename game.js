@@ -4,6 +4,7 @@ let flippedCards = [];
 let matchedPairs = 0;
 let moves = 0;
 let isFlipping = false;
+let isMuted = false;
 
 // Audio elements
 const gameSound = new Audio('assets/sounds/game sound 2.mp3');
@@ -11,11 +12,26 @@ const matchSound = new Audio('assets/sounds/match.mp3');
 const failSound = new Audio('assets/sounds/fail.mp3');
 const winSound = new Audio('assets/sounds/win.mp3');
 
-// Set audio volume
+// Set audio volume (Basiswerte)
 gameSound.volume = 0.5;
 matchSound.volume = 0.6;
 failSound.volume = 0.5;
 winSound.volume = 0.6;
+
+function applyMuteState() {
+    const factor = isMuted ? 0 : 1;
+    gameSound.muted = isMuted;
+    matchSound.muted = isMuted;
+    failSound.muted = isMuted;
+    winSound.muted = isMuted;
+
+    const btn = document.getElementById('soundToggle');
+    if (btn) {
+        btn.classList.toggle('muted', isMuted);
+        btn.textContent = isMuted ? '🔇' : '🔊';
+        btn.setAttribute('aria-label', isMuted ? 'Ton einschalten' : 'Ton stummschalten');
+    }
+}
 
 // Set game sound to loop
 gameSound.loop = true;
@@ -254,6 +270,16 @@ function updateDisplay() {
 
 // Start game sound immediately when page loads
 window.addEventListener('DOMContentLoaded', () => {
+    // Sound-Button initialisieren
+    const soundBtn = document.getElementById('soundToggle');
+    if (soundBtn) {
+        soundBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            applyMuteState();
+        });
+        applyMuteState();
+    }
+
     gameSound.play().catch(e => {
         console.log('Sound konnte nicht automatisch abgespielt werden:', e);
         // Try again after user interaction
