@@ -27,7 +27,21 @@
             <button id="restartBtn" class="restart-btn">🔄 Nochmal spielen</button>
         </div>
     </div>
-    
+
+    <!-- Gewinn-Modal -->
+    <div id="winModalOverlay" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-badge">Geschafft!</div>
+            <h2>🎉 Super gemacht! 🎉</h2>
+            <p>Du hast alle Paw Patrol Pärchen gefunden.</p>
+            <p class="modal-stat">Züge: <span id="winModalMoves">0</span></p>
+            <div class="modal-buttons">
+                <button id="winModalReplay" class="modal-button">🔄 Nochmal spielen</button>
+                <button id="winModalClose" class="modal-button secondary">Zurück zum Spielfeld</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <script src="game.js"></script>
 </body>

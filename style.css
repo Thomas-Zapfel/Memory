@@ -58,7 +58,7 @@ h1 {
 
 .game-board {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 15px;
     flex: 1;
     perspective: 1000px;
@@ -213,7 +213,140 @@ h1 {
     transform: translateY(0);
 }
 
+/* Gewinn-Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.modal-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+    border-radius: 24px;
+    padding: 24px 26px 22px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    position: relative;
+    border: 2px solid rgba(30, 144, 255, 0.4);
+}
+
+.modal h2 {
+    font-size: 2em;
+    color: #1E90FF;
+    margin-bottom: 10px;
+}
+
+.modal p {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.modal .modal-stat {
+    font-size: 1.1em;
+    color: #1E90FF;
+    font-weight: bold;
+    margin-bottom: 18px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.modal-button {
+    background: linear-gradient(135deg, #1E90FF 0%, #4169E1 100%);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    font-size: 1em;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Comic Sans MS', 'Arial', sans-serif;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.modal-button.secondary {
+    background: transparent;
+    color: #1E90FF;
+    border: 2px solid rgba(30, 144, 255, 0.4);
+    box-shadow: none;
+}
+
+.modal-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.25);
+    filter: brightness(1.03);
+}
+
+.modal-button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-badge {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #FFD700;
+    color: #B8860B;
+    padding: 4px 18px;
+    border-radius: 999px;
+    font-weight: bold;
+    font-size: 0.9em;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border: 2px solid #fff6bf;
+}
+
 /* Responsive Design */
+@media (max-width: 1024px) {
+    .container {
+        max-width: 1000px;
+        max-height: none;
+        padding: 18px;
+    }
+
+    .game-layout {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .matched-stack {
+        width: 100%;
+        min-width: auto;
+        min-height: 180px;
+        margin-top: 8px;
+    }
+
+    .game-board {
+        grid-template-columns: repeat(4, minmax(70px, 1fr));
+        gap: 14px;
+    }
+
+    .card-back {
+        font-size: 3.5em;
+    }
+}
+
 @media (max-width: 768px) {
     h1 {
         font-size: 2em;

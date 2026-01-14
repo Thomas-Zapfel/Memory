@@ -165,6 +165,9 @@ function checkMatch() {
 
 // Win game
 function winGame() {
+    // Hintergrundmusik stoppen
+    gameSound.pause();
+
     winSound.play().catch(e => console.log('Sound konnte nicht abgespielt werden:', e));
     
     // Confetti effect
@@ -194,9 +197,14 @@ function winGame() {
         }
     }());
     
-    // Show win message
+    // Zeige modernes Gewinn-Modal
     setTimeout(() => {
-        alert(`🎉 Glückwunsch! Du hast alle Pärchen gefunden! 🎉\n\nZüge: ${moves}`);
+        const overlay = document.getElementById('winModalOverlay');
+        const movesEl = document.getElementById('winModalMoves');
+        if (overlay && movesEl) {
+            movesEl.textContent = moves;
+            overlay.classList.add('visible');
+        }
     }, 500);
 }
 
@@ -259,6 +267,29 @@ window.addEventListener('DOMContentLoaded', () => {
 document.getElementById('restartBtn').addEventListener('click', () => {
     initGame();
 });
+
+// Modal Buttons
+const winModalOverlay = document.getElementById('winModalOverlay');
+const winModalReplay = document.getElementById('winModalReplay');
+const winModalClose = document.getElementById('winModalClose');
+
+if (winModalReplay) {
+    winModalReplay.addEventListener('click', () => {
+        if (winModalOverlay) {
+            winModalOverlay.classList.remove('visible');
+        }
+        initGame();
+    });
+}
+
+if (winModalClose) {
+    winModalClose.addEventListener('click', () => {
+        if (winModalOverlay) {
+            winModalOverlay.classList.remove('visible');
+        }
+        // Musik nach Schließen nicht automatisch neu starten, Spieler entscheidet mit Restart
+    });
+}
 
 // Initialize game on load
 initGame();
