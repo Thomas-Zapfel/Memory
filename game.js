@@ -4,129 +4,29 @@ let flippedCards = [];
 let matchedPairs = 0;
 let moves = 0;
 let isFlipping = false;
-let isMuted = false;
-let isFullscreen = false;
-
-function setViewportHeightVar() {
-    // iOS/iPadOS/Android: innerHeight berücksichtigt Browserleisten zuverlässiger als 100vh
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-}
-
-function layoutToFit() {
-    setViewportHeightVar();
-
-    const board = document.getElementById('gameBoard');
-    const layout = document.querySelector('.game-layout');
-    if (!board || !layout) return;
-
-    // Gap aus CSS lesen (Fallback)
-    const computed = window.getComputedStyle(board);
-    const gap = parseFloat(computed.gap) || 12;
-
-    const widthAvailable = board.clientWidth;
-
-    // verfügbare Höhe grob: sichtbare Viewport-Höhe minus Header/Controls
-    const header = document.querySelector('header');
-    const controls = document.querySelector('.controls');
-    const viewportHeight = window.innerHeight;
-
-    let usedTopBottom = 40; // Sicherheitsabstand
-    if (header) usedTopBottom += header.offsetHeight;
-    if (controls) usedTopBottom += controls.offsetHeight;
-
-    const heightAvailable = Math.max(120, viewportHeight - usedTopBottom);
-
-    if (widthAvailable <= 0 || heightAvailable <= 0) return;
-
-    // 4 Spalten / 4 Reihen => Karten-Größe so wählen, dass beides passt
-    const sizeByWidth = Math.floor((widthAvailable - gap * 3) / 4);
-    const sizeByHeight = Math.floor((heightAvailable - gap * 3) / 4);
-    const cardSize = Math.max(48, Math.min(sizeByWidth, sizeByHeight));
-
-    document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
-    document.documentElement.style.setProperty('--card-gap', `${Math.min(gap, 12)}px`);
-}
 
 // Audio elements
-const gameSound = new Audio('assets/sounds/game sound 2.mp3');
+const gameSound = new Audio('assets/sounds/game sound.mp3');
 const matchSound = new Audio('assets/sounds/match.mp3');
 const failSound = new Audio('assets/sounds/fail.mp3');
 const winSound = new Audio('assets/sounds/win.mp3');
 
-// Set audio volume (Basiswerte)
+// Set audio volume
 gameSound.volume = 0.5;
 matchSound.volume = 0.6;
 failSound.volume = 0.5;
 winSound.volume = 0.6;
 
-function applyMuteState() {
-    const factor = isMuted ? 0 : 1;
-    gameSound.muted = isMuted;
-    matchSound.muted = isMuted;
-    failSound.muted = isMuted;
-    winSound.muted = isMuted;
-
-    const btn = document.getElementById('soundToggle');
-    if (btn) {
-        btn.classList.toggle('muted', isMuted);
-        btn.textContent = isMuted ? '🔇' : '🔊';
-        btn.setAttribute('aria-label', isMuted ? 'Ton einschalten' : 'Ton stummschalten');
-    }
-}
-
-function toggleFullscreen() {
-    const doc = document;
-    const docEl = document.documentElement;
-
-    if (!doc.fullscreenElement) {
-        try {
-            if (docEl.requestFullscreen) {
-                docEl.requestFullscreen();
-            } else {
-                alert('Vollbild wird von diesem Browser/Tablet leider nicht unterstützt. Tipp: Auf iPad/Safari funktioniert echtes Vollbild oft nur als App über "Zum Home-Bildschirm".');
-            }
-        } catch (e) {
-            console.log('Fullscreen Fehler:', e);
-            alert('Vollbild konnte nicht aktiviert werden. Tipp: Auf iPad/Safari funktioniert echtes Vollbild oft nur als App über "Zum Home-Bildschirm".');
-        }
-        isFullscreen = true;
-    } else {
-        if (doc.exitFullscreen) {
-            doc.exitFullscreen();
-        }
-        isFullscreen = false;
-    }
-
-    const btn = document.getElementById('fullscreenToggle');
-    if (btn) {
-        const active = !!doc.fullscreenElement;
-        btn.textContent = active ? '🡼' : '⛶';
-        btn.setAttribute('aria-label', active ? 'Vollbild verlassen' : 'Vollbild aktivieren');
-    }
-}
-
-// Set game sound to loop
-gameSound.loop = true;
-
-// Card images (using all 8 images, each appears twice for 16 cards total)
+// Card images (using bild1.png to bild4.png, each appears twice)
 const cardImages = [
     'assets/images/bild1.png',
     'assets/images/bild2.png',
     'assets/images/bild3.png',
     'assets/images/bild4.png',
-    'assets/images/bild5.png',
-    'assets/images/bild6.png',
-    'assets/images/bild7.png',
-    'assets/images/bild8.png',
     'assets/images/bild1.png',
     'assets/images/bild2.png',
     'assets/images/bild3.png',
-    'assets/images/bild4.png',
-    'assets/images/bild5.png',
-    'assets/images/bild6.png',
-    'assets/images/bild7.png',
-    'assets/images/bild8.png'
+    'assets/images/bild4.png'
 ];
 
 // Initialize game
@@ -138,14 +38,6 @@ function initGame() {
     isFlipping = false;
     
     updateDisplay();
-    
-    // Stop and reset game sound
-    gameSound.pause();
-    gameSound.currentTime = 0;
-    
-    // Clear matched stack
-    const matchedStack = document.getElementById('matchedStack');
-    matchedStack.innerHTML = '<h3>Gefundene Pärchen</h3>';
     
     // Shuffle cards
     const shuffledImages = [...cardImages].sort(() => Math.random() - 0.5);
@@ -169,7 +61,7 @@ function initGame() {
         
         const cardBack = document.createElement('div');
         cardBack.className = 'card-back';
-        //cardBack.textContent = '🐾';
+        cardBack.textContent = '🐾';
         
         card.appendChild(cardFront);
         card.appendChild(cardBack);
@@ -179,13 +71,8 @@ function initGame() {
         gameBoard.appendChild(card);
         cards.push(card);
     });
-
-    // Nach DOM-Aufbau Karten-Größe an Viewport anpassen
-    requestAnimationFrame(() => {
-        layoutToFit();
-    });
     
-    // Play game sound in loop
+    // Play game sound
     gameSound.play().catch(e => console.log('Sound konnte nicht abgespielt werden:', e));
 }
 
@@ -230,16 +117,11 @@ function checkMatch() {
         // Play match sound
         matchSound.play().catch(e => console.log('Sound konnte nicht abgespielt werden:', e));
         
-        // Move matched pair to stack
-        setTimeout(() => {
-            moveToStack(card1, card2, image1);
-        }, 500);
-        
         // Check if game is won
         if (matchedPairs === 8) {
             setTimeout(() => {
                 winGame();
-            }, 1000);
+            }, 500);
         }
         
         flippedCards = [];
@@ -259,9 +141,6 @@ function checkMatch() {
 
 // Win game
 function winGame() {
-    // Hintergrundmusik stoppen
-    gameSound.pause();
-
     winSound.play().catch(e => console.log('Sound konnte nicht abgespielt werden:', e));
     
     // Confetti effect
@@ -291,53 +170,10 @@ function winGame() {
         }
     }());
     
-    // Zeige modernes Gewinn-Modal
+    // Show win message
     setTimeout(() => {
-        const overlay = document.getElementById('winModalOverlay');
-        const movesEl = document.getElementById('winModalMoves');
-        if (overlay && movesEl) {
-            movesEl.textContent = moves;
-            overlay.classList.add('visible');
-        }
+        alert(`🎉 Glückwunsch! Du hast alle Pärchen gefunden! 🎉\n\nZüge: ${moves}`);
     }, 500);
-}
-
-// Move matched pair to stack
-function moveToStack(card1, card2, image) {
-    const matchedStack = document.getElementById('matchedStack');
-    
-    // Create stack item
-    const stackItem = document.createElement('div');
-    stackItem.className = 'stack-item';
-    stackItem.style.zIndex = matchedPairs;
-    
-    // Calculate position based on number of pairs found
-    const topOffset = 50 + (matchedPairs - 1) * 10;
-    const rotation = (matchedPairs - 1) % 2 === 0 ? 
-        (matchedPairs - 1) * 2 : 
-        -(matchedPairs - 1) * 2;
-    
-    stackItem.style.top = `${topOffset}px`;
-    stackItem.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
-    
-    const stackImg = document.createElement('img');
-    stackImg.src = image;
-    stackImg.alt = 'Gefundenes Paar';
-    stackItem.appendChild(stackImg);
-    
-    matchedStack.appendChild(stackItem);
-    
-    // Hide cards but keep their space in the grid
-    setTimeout(() => {
-        card1.style.opacity = '0';
-        card2.style.opacity = '0';
-        setTimeout(() => {
-            card1.style.visibility = 'hidden';
-            card2.style.visibility = 'hidden';
-            card1.style.pointerEvents = 'none';
-            card2.style.pointerEvents = 'none';
-        }, 300);
-    }, 200);
 }
 
 // Update display
@@ -346,94 +182,10 @@ function updateDisplay() {
     document.getElementById('matches').textContent = matchedPairs;
 }
 
-// Start game sound immediately when page loads
-window.addEventListener('DOMContentLoaded', () => {
-    // Viewport-Höhe und Layout initial setzen
-    layoutToFit();
-    window.addEventListener('resize', layoutToFit);
-    window.addEventListener('orientationchange', () => setTimeout(layoutToFit, 150));
-
-    // Sound-Button initialisieren
-    const soundBtn = document.getElementById('soundToggle');
-    const fullscreenBtn = document.getElementById('fullscreenToggle');
-    const startOverlay = document.getElementById('startOverlay');
-    const startGameBtn = document.getElementById('startGameBtn');
-    const closeTabBtn = document.getElementById('closeTabBtn');
-    if (soundBtn) {
-        soundBtn.addEventListener('click', () => {
-            isMuted = !isMuted;
-            applyMuteState();
-        });
-        applyMuteState();
-    }
-
-    if (fullscreenBtn) {
-        fullscreenBtn.addEventListener('click', () => {
-            toggleFullscreen();
-        });
-    }
-
-    // Button-Status bei externen Fullscreen-Änderungen (z.B. ESC)
-    document.addEventListener('fullscreenchange', () => {
-        const btn = document.getElementById('fullscreenToggle');
-        if (btn) {
-            const active = !!document.fullscreenElement;
-            btn.textContent = active ? '🡼' : '⛶';
-            btn.setAttribute('aria-label', active ? 'Vollbild verlassen' : 'Vollbild aktivieren');
-        }
-        layoutToFit();
-    });
-
-    if (startGameBtn) {
-        startGameBtn.addEventListener('click', () => {
-            // Vollbild versuchen, dann Spiel starten
-            toggleFullscreen();
-            initGame();
-            if (startOverlay) {
-                startOverlay.classList.add('hidden');
-            }
-        });
-    }
-
-    if (closeTabBtn) {
-        closeTabBtn.addEventListener('click', () => {
-            window.close();
-            // Falls Browser das Schließen blockiert:
-            setTimeout(() => {
-                if (!window.closed) {
-                    alert('Dieser Browser erlaubt es nicht, den Tab automatisch zu schließen. Bitte den Tab manuell oben im Browser schließen.');
-                }
-            }, 200);
-        });
-    }
-});
-
 // Restart button
 document.getElementById('restartBtn').addEventListener('click', () => {
     initGame();
 });
 
-// Modal Buttons
-const winModalOverlay = document.getElementById('winModalOverlay');
-const winModalReplay = document.getElementById('winModalReplay');
-const winModalClose = document.getElementById('winModalClose');
-
-if (winModalReplay) {
-    winModalReplay.addEventListener('click', () => {
-        if (winModalOverlay) {
-            winModalOverlay.classList.remove('visible');
-        }
-        initGame();
-    });
-}
-
-if (winModalClose) {
-    winModalClose.addEventListener('click', () => {
-        if (winModalOverlay) {
-            winModalOverlay.classList.remove('visible');
-        }
-        // Musik nach Schließen nicht automatisch neu starten, Spieler entscheidet mit Restart
-    });
-}
-
-// Kein automatischer Spielstart mehr – Start erfolgt über Start-Overlay
+// Initialize game on load
+initGame();
