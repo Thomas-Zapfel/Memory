@@ -25,7 +25,17 @@ function layoutToFit() {
     const gap = parseFloat(computed.gap) || 12;
 
     const widthAvailable = board.clientWidth;
-    const heightAvailable = layout.clientHeight;
+
+    // verfügbare Höhe grob: sichtbare Viewport-Höhe minus Header/Controls
+    const header = document.querySelector('header');
+    const controls = document.querySelector('.controls');
+    const viewportHeight = window.innerHeight;
+
+    let usedTopBottom = 40; // Sicherheitsabstand
+    if (header) usedTopBottom += header.offsetHeight;
+    if (controls) usedTopBottom += controls.offsetHeight;
+
+    const heightAvailable = Math.max(120, viewportHeight - usedTopBottom);
 
     if (widthAvailable <= 0 || heightAvailable <= 0) return;
 
@@ -346,6 +356,9 @@ window.addEventListener('DOMContentLoaded', () => {
     // Sound-Button initialisieren
     const soundBtn = document.getElementById('soundToggle');
     const fullscreenBtn = document.getElementById('fullscreenToggle');
+    const startOverlay = document.getElementById('startOverlay');
+    const startGameBtn = document.getElementById('startGameBtn');
+    const closeTabBtn = document.getElementById('closeTabBtn');
     if (soundBtn) {
         soundBtn.addEventListener('click', () => {
             isMuted = !isMuted;
@@ -371,13 +384,28 @@ window.addEventListener('DOMContentLoaded', () => {
         layoutToFit();
     });
 
-    gameSound.play().catch(e => {
-        console.log('Sound konnte nicht automatisch abgespielt werden:', e);
-        // Try again after user interaction
-        document.addEventListener('click', () => {
-            gameSound.play().catch(err => console.log('Sound Fehler:', err));
-        }, { once: true });
-    });
+    if (startGameBtn) {
+        startGameBtn.addEventListener('click', () => {
+            // Vollbild versuchen, dann Spiel starten
+            toggleFullscreen();
+            initGame();
+            if (startOverlay) {
+                startOverlay.classList.add('hidden');
+            }
+        });
+    }
+
+    if (closeTabBtn) {
+        closeTabBtn.addEventListener('click', () => {
+            window.close();
+            // Falls Browser das Schließen blockiert:
+            setTimeout(() => {
+                if (!window.closed) {
+                    alert('Dieser Browser erlaubt es nicht, den Tab automatisch zu schließen. Bitte den Tab manuell oben im Browser schließen.');
+                }
+            }, 200);
+        });
+    }
 });
 
 // Restart button
@@ -408,5 +436,4 @@ if (winModalClose) {
     });
 }
 
-// Initialize game on load
-initGame();
+// Kein automatischer Spielstart mehr – Start erfolgt über Start-Overlay
